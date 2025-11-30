@@ -2,9 +2,9 @@ services:
   postgres:
     image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_DB: ${DB_NAME:?evo}
-      POSTGRES_USER: ${DB_USERNAME:?evo}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?pass}
+      POSTGRES_DB: ${DB_NAME:-evo}
+      POSTGRES_USER: ${DB_USERNAME:-evo}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pass}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,22 +18,18 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     environment:
-      DB_CONNECTION=pgsql
-      DB_HOST=postgres
-      DB_PORT=5432
-      DB_DATABASE=${DB_NAME:?evo}
-      DB_USERNAME=${DB_USERNAME:?evo}
-      DB_PASSWORD=${DB_PASSWORD:?pass}
+      DB_NAME: ${DB_NAME:-evo}
+      DB_USERNAME: ${DB_USERNAME:-evo}
+      DB_PASSWORD: ${DB_PASSWORD:-pass}
 
-      EVO_ADMIN_LOGIN=${EVO_ADMIN_LOGIN:-admin}
-      EVO_ADMIN_EMAIL=${EVO_ADMIN_EMAIL:-admin@example.com}
-      EVO_ADMIN_PASSWORD=${EVO_ADMIN_PASSWORD:-admin123}
-      EVO_TABLE_PREFIX=${EVO_TABLE_PREFIX:-evo_}
-      EVO_LANGUAGE=${EVO_LANGUAGE:-uk}
-      EVO_MAIN_PACKAGE_NAME=${EVO_MAIN_PACKAGE_NAME:-main}
+      EVO_ADMIN_LOGIN: ${EVO_ADMIN_LOGIN:-admin}
+      EVO_ADMIN_EMAIL: ${EVO_ADMIN_EMAIL:-admin@example.com}
+      EVO_ADMIN_PASSWORD: ${EVO_ADMIN_PASSWORD:-admin123}
+      EVO_TABLE_PREFIX: ${EVO_TABLE_PREFIX:-evo_}
+      EVO_LANGUAGE: ${EVO_LANGUAGE:-uk}
+      EVO_MAIN_PACKAGE_NAME: ${EVO_MAIN_PACKAGE_NAME:-main}
 
     volumes:
-      # один volume на весь сайт
       - evo_app:/var/www/html
 
     depends_on:
