@@ -18,14 +18,16 @@ cd /var/www/html
 if [ ! -f core/factory/version.php ]; then
   echo "🚀 Installing Evolution CMS..."
 
-  echo "🧹 Cleaning webroot /var/www/html for fresh install..."
-  # видаляємо ВСЕ в /var/www/html, але не саму директорію
-  find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+  # якщо директория вже не порожня — покажемо вміст і звалимось
+  if [ "$(ls -A . 2>/dev/null)" ]; then
+    echo "❌ /var/www/html is not empty, but Evolution is not installed."
+    echo "   Content:"
+    ls -A .
+    exit 1
+  fi
 
-  # ставимо Evo в порожню папку
   composer create-project evolutioncms/evolution . --no-dev --no-interaction --remove-vcs
 
-  # якщо раптом create-project не створив core/factory/version.php — вивалюємося
   if [ ! -f core/factory/version.php ]; then
     echo "❌ Evolution install failed: core/factory/version.php not found"
     exit 1
