@@ -2,13 +2,14 @@ services:
   postgres:
     image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_DB: ${DB_NAME:?evo}
-      POSTGRES_USER: ${DB_USERNAME:?evo}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?pass}
+      # Ці три змінні зручно правити в Coolify (.env / UI)
+      - POSTGRES_DB=${DB_NAME:?evo}
+      - POSTGRES_USER=${DB_USERNAME:?evo}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:?pass}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-evo} -d ${DB_NAME:-evo}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,21 +19,24 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     environment:
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_NAME:?evo}
-      DB_USERNAME: ${DB_USERNAME:?evo}
-      DB_PASSWORD: ${DB_PASSWORD:?pass}
+      # DB для EVO
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_NAME:?evo}
+      - DB_USERNAME=${DB_USERNAME:?evo}
+      - DB_PASSWORD=${DB_PASSWORD:?pass}
 
-      EVO_ADMIN_LOGIN: admin
-      EVO_ADMIN_EMAIL: admin@example.com
-      EVO_ADMIN_PASSWORD: admin123
-      EVO_TABLE_PREFIX: evo_
-      EVO_LANGUAGE: uk
-      EVO_MAIN_PACKAGE_NAME: main
+      # налаштування інсталятора
+      - EVO_ADMIN_LOGIN=${EVO_ADMIN_LOGIN:-admin}
+      - EVO_ADMIN_EMAIL=${EVO_ADMIN_EMAIL:-admin@example.com}
+      - EVO_ADMIN_PASSWORD=${EVO_ADMIN_PASSWORD:-admin123}
+      - EVO_TABLE_PREFIX=${EVO_TABLE_PREFIX:-evo_}
+      - EVO_LANGUAGE=${EVO_LANGUAGE:-uk}
+      - EVO_MAIN_PACKAGE_NAME=${EVO_MAIN_PACKAGE_NAME:-main}
 
     volumes:
+      # важливе: core/ і storage/ на volume, щоб інсталяція зберігалася між деплоями
       - evo_core:/var/www/html/core
       - evo_assets:/var/www/html/assets
       - evo_storage:/var/www/html/core/storage

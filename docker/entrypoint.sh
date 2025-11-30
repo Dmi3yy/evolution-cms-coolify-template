@@ -1,22 +1,25 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+DB_PORT="${DB_PORT:-5432}"
+
 # чек БД
-echo "⏳ Waiting for PostgreSQL at $DB_HOST:$DB_PORT…"
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME"; do
+echo "⏳ Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}…"
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" >/dev/null 2>&1; do
   sleep 1
 done
 echo "✅ PostgreSQL ready"
 
 cd /var/www/html
 
-# якщо Evolution CMS НЕ встановлений
+# якщо Evolution CMS НЕ встановлений (нема core/factory/version.php)
 if [ ! -f core/factory/version.php ]; then
   echo "🚀 Installing Evolution CMS..."
 
-  composer create-project evolutioncms/evolution .
+  # ставимо чистий Evo
+  composer create-project evolutioncms/evolution . --no-dev --no-interaction
 
   cd install
   php cli-install.php \
@@ -36,12 +39,15 @@ if [ ! -f core/factory/version.php ]; then
 
   cd ../core
   php artisan package:create "${EVO_MAIN_PACKAGE_NAME:-main}"
-  echo "<?php return \"EvolutionCMS\\${EVO_MAIN_PACKAGE_NAME:-main}\\Controllers\\\";" \
-    > custom/config/cms/settings/ControllerNamespace.php
+
+  cat > custom/config/cms/settings/ControllerNamespace.php <<EOF
+<?php return "EvolutionCMS\\${EVO_MAIN_PACKAGE_NAME:-main}\\Controllers\\";
+EOF
 
   echo "🎉 Evolution CMS installed!"
 else
   echo "ℹ️ Evolution already installed — skipping installer."
 fi
 
+# запускаємо Apache
 exec apache2-foreground
