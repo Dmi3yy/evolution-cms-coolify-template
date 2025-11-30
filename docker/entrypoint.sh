@@ -3,7 +3,10 @@ set -e
 
 echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+# defaults
+DB_HOST="${DB_HOST:-postgres}"
 DB_PORT="${DB_PORT:-5432}"
+DB_USERNAME="${DB_USERNAME:-evo}"
 
 # чек БД
 echo "⏳ Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}…"
