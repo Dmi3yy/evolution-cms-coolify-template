@@ -14,12 +14,22 @@ echo "✅ PostgreSQL ready"
 
 cd /var/www/html
 
-# якщо Evolution CMS НЕ встановлений (нема core/factory/version.php)
+# якщо Evolution CMS НЕ встановлений
 if [ ! -f core/factory/version.php ]; then
   echo "🚀 Installing Evolution CMS..."
 
-  # ставимо чистий Evo
-  composer create-project evolutioncms/evolution . --no-dev --no-interaction
+  echo "🧹 Cleaning webroot /var/www/html for fresh install..."
+  # видаляємо ВСЕ в /var/www/html, але не саму директорію
+  find . -mindepth 1 -maxdepth 1 -exec rm -rf {} \;
+
+  # ставимо Evo в порожню папку
+  composer create-project evolutioncms/evolution . --no-dev --no-interaction --remove-vcs
+
+  # якщо раптом create-project не створив core/factory/version.php — вивалюємося
+  if [ ! -f core/factory/version.php ]; then
+    echo "❌ Evolution install failed: core/factory/version.php not found"
+    exit 1
+  fi
 
   cd install
   php cli-install.php \
@@ -49,5 +59,4 @@ else
   echo "ℹ️ Evolution already installed — skipping installer."
 fi
 
-# запускаємо Apache
 exec apache2-foreground

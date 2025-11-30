@@ -1,6 +1,5 @@
 FROM php:8.3-apache
 
-# System packages + postgres client
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -19,12 +18,10 @@ RUN apt-get update && apt-get install -y \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 
-# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Наш entrypoint з автоінсталом
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
